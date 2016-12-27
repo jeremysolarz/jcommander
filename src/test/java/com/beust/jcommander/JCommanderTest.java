@@ -804,6 +804,14 @@ public class JCommanderTest {
     new JCommander(a).parse("b");
   }
 
+  @Test
+  public void mainParameterShouldValidateParameterAndValue(){
+    MainParameterValidator validator = new MainParameterValidator();
+    JCommander jCommander = new JCommander(validator, "../");
+    System.out.println("Path(s): " + validator.files);
+
+  }
+
   @Parameters(commandNames = { "--configure" })
   public static class ConfigureArgs {
   }
