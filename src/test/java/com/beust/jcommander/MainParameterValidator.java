@@ -13,26 +13,30 @@ public class MainParameterValidator {
 
     AtomicInteger counter = new AtomicInteger(0);
 
-    @Parameter(description = "A path", validateWith = DirectoryNameValidator.class,
-            validateValueWith = DirectoryListValidator.class)
+    @Parameter(
+        description = "A path",
+        validateValueWith = DirectoryListValidator.class,
+        validateWith = DirectoryNameValidator.class
+    )
     List<String> files = new ArrayList<>(Collections.singletonList("./"));
 
-    public static class DirectoryNameValidator implements IParameterValidator {
-        @Override
-        public void validate(String name, String value) throws ParameterException {
-            System.out.println("Validating directory: " + value);
-            checkIsExistingDirectory(value);
-        }
-
-    }
     public static class DirectoryListValidator implements IValueValidator<List<String>> {
         @Override
         public void validate(String name, List<String> value) throws ParameterException {
-            System.out.println("Validating parameters list: " + value);
+            System.out.println("Validating value: " + value);
             for (String directoryName : value) {
                 checkIsExistingDirectory(directoryName);
             }
         }
+    }
+
+    public static class DirectoryNameValidator implements IParameterValidator {
+        @Override
+        public void validate(String name, String value) throws ParameterException {
+            System.out.println("Validating parameter: " + value);
+            checkIsExistingDirectory(value);
+        }
+
     }
 
     private static void checkIsExistingDirectory(String directoryName) {
