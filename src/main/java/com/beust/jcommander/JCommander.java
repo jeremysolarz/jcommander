@@ -140,7 +140,7 @@ public class JCommander {
   private boolean m_helpWasSpecified;
 
   private List<String> m_unknownArgs = Lists.newArrayList();
-  
+
   private static Console m_console;
 
   private final Options options;
@@ -238,7 +238,7 @@ public class JCommander {
   public void setExpandAtSign(boolean expandAtSign){
     options.expandAtSign = expandAtSign;
   }
-  
+
   public static Console getConsole() {
     if (m_console == null) {
       try {
@@ -597,7 +597,7 @@ public class JCommander {
               new ParameterDescription(object, dp, parameterized, options.m_bundle, this);
           m_fields.put(parameterized, pd);
           m_descriptions.put(new StringKey(name), pd);
-    
+
           if (dp.required()) m_requiredFields.put(parameterized, pd);
         }
       }
@@ -714,9 +714,16 @@ public class JCommander {
               }
             }
 
-            ParameterDescription.validateParameter(m_mainParameterDescription,
-                m_mainParameterAnnotation.validateWith(),
-                "Default", value);
+            Class<? extends IValueValidator> validator = m_mainParameterAnnotation.validateValueWith();
+            if (validator != null) {
+                ParameterDescription.validateValueParameter(validator, "Default", value);
+            }
+
+            ParameterDescription.validateParameter(
+                    m_mainParameterDescription,
+                    m_mainParameterAnnotation.validateWith(),
+             "Default", value
+            );
 
             m_mainParameterDescription.setAssigned(true);
             mp.add(convertedValue);
@@ -730,7 +737,7 @@ public class JCommander {
             } else if (jc != null){
                 m_parsedCommand = jc.m_programName.m_name;
                 m_parsedAlias = arg; //preserve the original form
-    
+
                 // Found a valid command, ask it to parse the remainder of the arguments.
                 // Setting the boolean commandParsed to true will force the current
                 // loop to end.
@@ -1435,7 +1442,7 @@ public class JCommander {
       }
       return sb.toString();
     }
-    
+
     @Override
     public int hashCode() {
       final int prime = 31;
@@ -1468,7 +1475,7 @@ public class JCommander {
     @Override
     public String toString() {
       return getDisplayName();
-      
+
     }
   }
 
