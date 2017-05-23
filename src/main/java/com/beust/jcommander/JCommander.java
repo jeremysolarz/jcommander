@@ -143,6 +143,8 @@ public class JCommander {
 
     private ProgramName programName;
 
+    private ParameterDescription programDescription;
+
     private boolean helpWasSpecified;
 
     private List<String> unknownArgs = Lists.newArrayList();
@@ -595,9 +597,12 @@ public class JCommander {
 
         List<Parameterized> parameterizeds = Parameterized.parseArg(object);
         for (Parameterized parameterized : parameterizeds) {
-            WrappedParameter wp = parameterized.getWrappedParameter();
-            if (wp != null && wp.getParameter() != null) {
-                Parameter annotation = wp.getParameter();
+            if (parameterized.getWrappedParameters() != null && parameterized.getWrappedParameters().getParameters() != null) {
+                Parameters annotation = parameterized.getWrappedParameters().getParameters();
+                programDescription = new ParameterDescription(object, annotation, parameterized, options.bundle, this);
+            }
+            else if (parameterized.getWrappedParameter() != null && parameterized.getWrappedParameter().getParameter() != null) {
+                Parameter annotation = parameterized.getWrappedParameter().getParameter();
                 //
                 // @Parameter
                 //
@@ -638,11 +643,11 @@ public class JCommander {
                             + "' cannot be null.");
                 }
                 addDescription(delegateObject);
-            } else if (wp != null && wp.getDynamicParameter() != null) {
+            } else if (parameterized.getWrappedParameter() != null && parameterized.getWrappedParameter().getDynamicParameter() != null) {
                 //
                 // @DynamicParameter
                 //
-                DynamicParameter dp = wp.getDynamicParameter();
+                DynamicParameter dp = parameterized.getWrappedParameter().getDynamicParameter();
                 for (String name : dp.names()) {
                     if (descriptions.containsKey(name)) {
                         throw new ParameterException("Found the option " + name + " multiple times");
@@ -1225,6 +1230,9 @@ public class JCommander {
         mainLine.append(indent).append("Usage: ").append(programName);
         if (hasOptions) mainLine.append(" [options]");
         if (hasCommands) mainLine.append(indent).append(" [command] [command options]");
+        if (programDescription != null) {
+            mainLine.append(" ").append(programDescription.getDescription());
+        }
         if (mainParameter != null && mainParameter.description != null) {
             mainLine.append(" ").append(mainParameter.description.getDescription());
         }

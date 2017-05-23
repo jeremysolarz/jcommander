@@ -29,8 +29,12 @@ import java.util.ResourceBundle;
 public class ParameterDescription {
   private Object object;
 
+  private Parameters parametersAnnotation;
   private WrappedParameter wrappedParameter;
+
   private Parameter parameterAnnotation;
+  private WrappedParameters wrappedParameters;
+
   private DynamicParameter dynamicParameterAnnotation;
 
   /** The field/method */
@@ -62,6 +66,12 @@ public class ParameterDescription {
       ResourceBundle bundle, JCommander jc) {
     parameterAnnotation = annotation;
     wrappedParameter = new WrappedParameter(parameterAnnotation);
+    init(object, parameterized, bundle, jc);
+  }
+
+  public ParameterDescription(Object object, Parameters annotation, Parameterized parameterized, ResourceBundle bundle, JCommander jc) {
+    parametersAnnotation = annotation;
+    wrappedParameters = new WrappedParameters(annotation);
     init(object, parameterized, bundle, jc);
   }
 
@@ -115,12 +125,16 @@ public class ParameterDescription {
     }
     this.jCommander = jCommander;
 
-    if (parameterAnnotation != null) {
+    if (parametersAnnotation != null) {
+      String description = parametersAnnotation.commandDescription();
+      initDescription(description, parametersAnnotation.commandDescriptionKey(),
+              parametersAnnotation.commandNames());
+    } else if (parameterAnnotation != null) {
       String description;
       if (Enum.class.isAssignableFrom(parameterized.getType())
           && parameterAnnotation.description().isEmpty()) {
         description = "Options: " + EnumSet.allOf((Class<? extends Enum>) parameterized.getType());
-      }else {
+      } else {
         description = parameterAnnotation.description();
       }
       initDescription(description, parameterAnnotation.descriptionKey(),

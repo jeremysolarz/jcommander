@@ -26,11 +26,13 @@ public class Parameterized {
 
   // Either of these two
   private WrappedParameter wrappedParameter;
+  private WrappedParameters wrappedParameters;
   private ParametersDelegate parametersDelegate;
 
   public Parameterized(WrappedParameter wp, ParametersDelegate pd,
-      Field field, Method method) {
+                       WrappedParameters wps, Field field, Method method) {
     wrappedParameter = wp;
+    this.wrappedParameters = wps;
     this.method = method;
     this.field = field;
     if (this.field != null) {
@@ -77,7 +79,7 @@ public class Parameterized {
    * Given an object return the set of classes that it extends
    * or implements.
    *
-   * @param arg object to describe
+   * @param inputClass object to describe
    * @return set of classes that are implemented or extended by that object
    */
   private static Set<Class<?>> describeClassTree(Class<?> inputClass) {
@@ -106,6 +108,13 @@ public class Parameterized {
     // analyze each type
     for(Class<?> cls : types) {
 
+      Parameters classAnnotation = cls.getAnnotation(Parameters.class);
+
+      if (classAnnotation != null) {
+        result.add(new Parameterized(null, null,
+                new WrappedParameters((Parameters) classAnnotation), null, null));
+      }
+
       // check fields
       for (Field f : cls.getDeclaredFields()) {
         Annotation annotation = f.getAnnotation(Parameter.class);
@@ -113,13 +122,13 @@ public class Parameterized {
         Annotation dynamicParameter = f.getAnnotation(DynamicParameter.class);
         if (annotation != null) {
           result.add(new Parameterized(new WrappedParameter((Parameter) annotation), null,
-                  f, null));
+                  null, f, null));
         } else if (dynamicParameter != null) {
           result.add(new Parameterized(new WrappedParameter((DynamicParameter) dynamicParameter), null,
-                  f, null));
+                  null, f, null));
         } else if (delegateAnnotation != null) {
           result.add(new Parameterized(null, (ParametersDelegate) delegateAnnotation,
-                  f, null));
+                  null, f, null));
         }
       }
 
@@ -131,13 +140,13 @@ public class Parameterized {
         Annotation dynamicParameter = m.getAnnotation(DynamicParameter.class);
         if (annotation != null) {
           result.add(new Parameterized(new WrappedParameter((Parameter) annotation), null,
-                  null, m));
+                  null, null, m));
         } else if (dynamicParameter != null) {
           result.add(new Parameterized(new WrappedParameter((DynamicParameter) dynamicParameter), null,
-                  null, m));
+                  null, null, m));
         } else if (delegateAnnotation != null) {
           result.add(new Parameterized(null, (ParametersDelegate) delegateAnnotation,
-                  null, m));
+                  null, null, m));
         }
       }
     }
@@ -147,6 +156,10 @@ public class Parameterized {
 
   public WrappedParameter getWrappedParameter() {
     return wrappedParameter;
+  }
+
+  public WrappedParameters getWrappedParameters() {
+    return wrappedParameters;
   }
 
   public Class<?> getType() {
