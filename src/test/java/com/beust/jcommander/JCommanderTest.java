@@ -1214,6 +1214,20 @@ public class JCommanderTest {
         Assert.assertTrue(V2.validateCalled);
     }
 
+    public void usageWithDescritpionForMainCommand() {
+        @Parameters(commandDescription = "This command is used as base for foo")
+        class FooCommand {
+            @Parameter(names = {"-?","--help"}, description = "display this help",help = true)
+            private boolean helpRequested = false;
+        }
+        FooCommand a = new FooCommand();
+        StringBuilder sb = new StringBuilder();
+        JCommander jc = JCommander.newBuilder().addObject(a).build();
+        jc.usage(sb);
+        jc.setProgramName("foo-command");
+        Assert.assertTrue(sb.toString().contains("This command is used as base for foo"));
+    }
+
     public void usageCommandsUnderUsage() {
         class Arg {
         }
